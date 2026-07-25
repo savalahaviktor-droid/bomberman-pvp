@@ -1,0 +1,26 @@
+[
+  {
+    "id": "classic",
+    "name": "Classic",
+    "file": "map1.json",
+    "preview": "preview1.png"
+  },
+  {
+    "id": "arena",
+    "name": "Арена",
+    "file": "map2.json",
+    "preview": "preview2.png"
+  },
+  {
+    "id": "labyrinth",
+    "name": "Лабіринт",
+    "file": "map3.json",
+    "preview": "preview3.png"
+  },
+  {
+    "id": "cross",
+    "name": "Хрест",
+    "file": "map4.json",
+    "preview": "preview4.png"
+  }
+]

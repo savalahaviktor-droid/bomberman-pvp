@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bomberman PvP</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ЕКРАН ЛОГІНУ -->
+  <div id="loginScreen">
+    <div class="menu-box">
+      <h1 id="secretTrigger">💣 BOMBERMAN <span id="pvpTrigger">PVP</span></h1>
+      <p class="subtitle">Онлайн-гра. Введи логін і пароль — якщо акаунту ще немає, він створиться автоматично.</p>
+      <input id="loginInput" type="text" placeholder="Логін" maxlength="16" autocomplete="username" />
+      <input id="passInput" type="password" placeholder="Пароль" maxlength="32" autocomplete="current-password" />
+      <button id="loginBtn">УВІЙТИ</button>
+      <div id="loginMsg"></div>
+
+      <div class="menu-links">
+        <a href="#" id="openRanksLink">Інформація lvl</a>
+        <a href="#" id="openLeaderboardLink">Статистика гравців</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЕКРАН ЛОБІ -->
+  <div id="lobbyScreen" class="hidden">
+    <div class="menu-box wide" style="background:#161d29; border:3px solid #23d3c5; border-radius:10px; padding:32px 40px; width:420px; max-width:90vw; text-align:center; box-shadow:0 0 40px rgba(35,211,197,0.25);">
+      
+      <h1 style="margin:0 0 4px; font-size:28px; letter-spacing:1px; color:#7fdcd1; text-shadow:0 0 30px rgba(35,211,197,0.3);">
+  Готові до гри!
+  <span style="display:block; font-size:18px; color:#4ce06a; font-weight:500; margin-top:8px;">Класична карта</span>
+</h1>
+
+      <div id="lobbyPlayersList" style="
+        margin:16px 0;
+        text-align:left;
+        background:#0d1117;
+        border-radius:8px;
+        padding:10px 14px;
+        border:1px solid #2c3a4d;
+        min-height:100px;
+      ">
+        <div style="color:#555; text-align:center; padding:16px 0; font-size:14px;">Очікуємо гравців...</div>
+      </div>
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:8px 0 2px 0;
+        border-top:1px solid #1c2531;
+      ">
+        <span id="lobbyTimer" style="font-size:24px; font-weight:bold; color:#ff3b3b; font-variant-numeric:tabular-nums; min-width:70px; text-align:center;">⏱ 10с</span>
+        
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span style="font-size:15px; color:#ffffff; font-weight:bold;">Гравців:</span>
+          <span id="lobbyCount" style="font-size:22px; font-weight:bold; color:#ffd166;">0</span>
+          <span style="font-size:18px; color:#93a1b0;">/</span>
+          <span id="lobbyMax" style="font-size:18px; color:#93a1b0;">5</span>
+        </div>
+      </div>
+
+      <button id="leaveLobbyBtn" style="
+        width:100%;
+        padding:12px;
+        margin-top:16px;
+        border:2px solid #2c3a4d;
+        border-radius:6px;
+        background:transparent;
+        color:#ffffff;
+        font-weight:bold;
+        font-size:13px;
+        letter-spacing:1px;
+        cursor:pointer;
+        font-family:inherit;
+        transition:all 0.2s;
+      " onmouseover="this.style.borderColor='#23d3c5'; this.style.color='#23d3c5'; this.style.background='rgba(35,211,197,0.05)';" 
+      onmouseout="this.style.borderColor='#2c3a4d'; this.style.color='#ffffff'; this.style.background='transparent';">Вийти з лобі</button>
+
+    </div>
+  </div>
+
+  <!-- ЕКРАН СПИСКУ ЗВАНЬ -->
+  <div id="ranksScreen" class="hidden">
+    <div class="menu-box wide">
+      <h1>Звання</h1>
+      <p class="subtitle">Звання залежить від кількості вбивств</p>
+      <div class="rank-table" id="ranksTableBody"></div>
+      <button id="ranksBackBtn" class="back-btn">← НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЕКРАН ТОП ГРАВЦІВ -->
+  <div id="leaderboardScreen" class="hidden">
+    <div class="menu-box wide">
+      <div id="leaderboardBody" class="leaderboard-table">
+        <div class="lb-msg">Завантаження...</div>
+      </div>
+      <button id="leaderboardBackBtn" class="back-btn">← НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЕКРАН СТАТИСТИКИ ПІСЛЯ ВХОДУ (з повноцінним чатом) -->
+  <div id="statsScreen" class="hidden">
+    <div class="menu-box wide" style="width: 620px; max-width: 95vw; display: flex; flex-direction: column; padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h1 style="margin:0; font-size:22px;">Вітаю, <span id="statsUsername"></span>!</h1>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span style="font-size:12px; color:#555;">ID: <span id="statsUserId" style="color:#7fdcd1; font-weight:bold;">—</span></span>
+          <button id="openFriendsBtn" style="padding:6px 12px; border:2px solid #2c3a4d; border-radius:6px; background:#2c3a4d; color:#fff; font-size:14px; cursor:pointer; font-family:inherit; transition:all 0.2s;">👥 Друзі</button>
+        </div>
+      </div>
+
+      <!-- СТАТУС-БАР ГРУПИ -->
+      <div id="groupStatusBar" class="group-status-bar hidden" style="margin-bottom:8px;">
+        <div class="group-status-header">
+          <span class="group-title">👥 Група</span>
+          <span class="group-count" id="groupStatusCount">0/5</span>
+        </div>
+        <div id="groupStatusList"></div>
+      </div>
+
+      <!-- СТАТИСТИКА -->
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin:10px 0; align-items:stretch;">
+
+        <!-- ЛІВА КОЛОНКА: ЗВАННЯ + ПОГОН -->
+        <div style="flex:1; min-width:180px; background:#0d1117; border:2px solid #23d3c5; border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 0 15px rgba(35,211,197,0.15);">
+          <img id="statsRankBadge" class="rank-badge" src="ranks/rank_1.png" alt="" style="width:72px; height:48px;" />
+          <span id="statsRankName" style="font-size:16px; font-weight:bold; color:#7fdcd1; text-transform:uppercase; line-height:1.2; word-break:break-word;">Солдат</span>
+        </div>
+
+        <!-- ПРАВА КОЛОНКА: ВБИВСТВА + СМЕРТІ В РЯД -->
+        <div style="flex:2; min-width:200px; display:flex; gap:10px;">
+          <div style="flex:1; background:#0d1117; border:2px solid #23d3c5; border-radius:8px; padding:10px 12px 8px 12px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 0 15px rgba(35,211,197,0.15); min-height:70px;">
+            <div style="color:#93a1b0; font-size:9px; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px;">Вбивства</div>
+            <div id="statsKills" style="font-size:22px; font-weight:bold; color:#ffd166; line-height:1.2;">0</div>
+          </div>
+          <div style="flex:1; background:#0d1117; border:2px solid #23d3c5; border-radius:8px; padding:10px 12px 8px 12px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 0 15px rgba(35,211,197,0.15); min-height:70px;">
+            <div style="color:#93a1b0; font-size:9px; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px;">Смерті</div>
+            <div id="statsDeaths" style="font-size:22px; font-weight:bold; color:#ff8a8a; line-height:1.2;">0</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- НИЖНІЙ РЯДОК: ПЕРЕМОГИ + КНОПКА КАРТИ -->
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:4px; align-items:stretch;">
+
+        <div style="flex:1; min-width:100px; background:#0d1117; border:2px solid #23d3c5; border-radius:8px; padding:14px 12px 10px 12px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 0 15px rgba(35,211,197,0.15); min-height:76px;">
+          <div style="color:#93a1b0; font-size:9px; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px;">Перемог</div>
+          <div id="statsWins" style="font-size:22px; font-weight:bold; color:#ffd700; line-height:1.2;">0</div>
+        </div>
+
+        <button id="selectMapBtn" style="
+          flex:1; min-width:120px; min-height:76px;
+          padding:14px 16px 10px 16px;
+          border:2px solid #23d3c5;
+          border-radius:8px;
+          background:transparent;
+          color:#23d3c5;
+          font-weight:bold;
+          font-size:14px;
+          letter-spacing:1px;
+          cursor:pointer;
+          font-family:inherit;
+          transition:all 0.2s;
+          text-transform:uppercase;
+          box-shadow:0 0 15px rgba(35,211,197,0.15);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        " onmouseover="this.style.background='rgba(35,211,197,0.1)'; this.style.boxShadow='0 0 25px rgba(35,211,197,0.3)';" 
+        onmouseout="this.style.background='transparent'; this.style.boxShadow='0 0 15px rgba(35,211,197,0.15)';">Обрати карту</button>
+
+      </div>
+
+     <button id="enterArenaBtn" style="margin-top:20px; margin-bottom:10px; width:55%; max-width:400px; display:block; margin-left:auto; margin-right:auto;">⚔️ У БІЙ!</button>
+
+      <div id="statsMsg" style="min-height:18px; color:#ff6b6b; font-size:13px; margin-bottom:2px;"></div>
+
+      <!-- ЧАТ -->
+      <div id="chatContainer" style="display:flex; flex-direction:column; background:#0d1117; border:2px solid #23d3c5; border-radius:8px; height:190px; overflow:hidden; margin-top:0px; flex-shrink:0; box-shadow:0 0 15px rgba(35,211,197,0.1);">
+        <!-- Вкладки -->
+        <div id="chatTabs" style="display:flex; background:#161d29; border-bottom:1px solid #2c3a4d; flex-shrink:0; overflow-x:auto; padding:4px 6px 0 6px; gap:2px; min-height:34px; align-items:flex-end;">
+          <!-- Вкладка "Світ" (завжди активна) -->
+          <div class="chat-tab active" data-tab="world" onclick="switchChatTab('world')" style="display:flex; align-items:center; gap:4px; padding:4px 12px; background:#23d3c5; color:#0d1117; border-radius:4px 4px 0 0; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap; border:none; flex-shrink:0;">
+            <span>🌍 Світ</span>
+          </div>
+          <!-- Вкладка "Група" (з'являється коли є група) -->
+          <div class="chat-tab group-tab hidden" data-tab="group" onclick="switchChatTab('group')" style="display:none; align-items:center; gap:4px; padding:4px 12px; background:#2c3a4d; color:#93a1b0; border-radius:4px 4px 0 0; cursor:pointer; font-size:12px; font-weight:bold; white-space:nowrap; border:none; flex-shrink:0;">
+            <span>👥 Група</span>
+          </div>
+          <!-- Сюди будуть додаватися приватні вкладки -->
+        </div>
+
+        <!-- Область повідомлень -->
+        <div id="chatMessages" style="flex:1; overflow-y:auto; padding:6px 10px; background:#0d1117; font-size:13px; line-height:1.5; min-height:0;">
+          <div style="color:#555; text-align:center; padding:20px 0; font-size:13px;">Немає повідомлень</div>
+        </div>
+
+        <!-- Рядок вводу -->
+        <div style="display:flex; gap:6px; padding:6px 8px; background:#161d29; border-top:1px solid #2c3a4d; flex-shrink:0;">
+          <input id="chatInput" type="text" placeholder="Напишіть повідомлення..." style="flex:1; padding:6px 10px; border-radius:4px; border:1px solid #2c3a4d; background:#0d1117; color:#fff; font-size:13px; outline:none; font-family:inherit;">
+          <button id="chatSendBtn" style="padding:6px 16px; background:#23d3c5; color:#0d1117; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family:inherit; font-size:13px;">➤</button>
+        </div>
+      </div>
+      <!-- ===================== КІНЕЦЬ ЧАТУ ===================== -->
+
+      <div class="menu-links" style="margin-top:8px;">
+        <a href="#" id="openLeaderboardLink2">Статистика гравців</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЕКРАН ДРУЗІВ (з інтегрованою групою) -->
+  <div id="friendsScreen" class="hidden">
+    <div class="menu-box wide" style="width: 500px; max-width: 92vw;">
+      <h1 style="color:#23d3c5;">👥 Друзі</h1>
+      
+      <!-- Кнопки створення групи та вихід з групи -->
+      <div class="friends-group-actions">
+        <button id="groupCreateBtn" class="group-create-btn">➕ Створити групу</button>
+      </div>
+      
+      <div class="friend-search-row">
+        <input id="friendSearchInput" type="text" placeholder="Пошук за ніком або ID (напр. A55B1J84PP)" />
+        <button id="friendSearchBtn">🔍</button>
+      </div>
+      
+      <div id="friendSearchResults"></div>
+      
+      <div class="friends-section-title">
+        <span>📋 Мої друзі</span>
+        <span id="friendCount">0</span>
+      </div>
+      
+      <div id="friendsList">
+        <div style="color:#555; text-align:center; padding:16px 0; font-size:14px;">У вас немає друзів</div>
+      </div>
+      
+      <div class="requests-section">
+        <div class="requests-title">📩 Запити</div>
+        <div id="friendRequestsList">
+          <div style="color:#555; text-align:center; padding:8px 0; font-size:13px;">Нема запитів</div>
+        </div>
+      </div>
+      
+      <button id="friendsBackBtn" class="back-btn">← НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- КОНТЕКСТНЕ МЕНЮ ДЛЯ ГРУПИ -->
+  <div id="groupContextMenu" class="context-menu hidden">
+    <div class="context-menu-item leader" id="ctxPromote">👑 Передати лідерство</div>
+    <div class="context-menu-item danger" id="ctxKick">🚫 Вигнати з групи</div>
+    <div class="context-menu-item" id="ctxLeave">🚪 Вийти з групи</div>
+  </div>
+
+  <!-- КОНТЕКСТНЕ МЕНЮ ДЛЯ ЧАТУ -->
+  <div id="chatContextMenu" class="context-menu hidden">
+    <div class="context-menu-item" id="ctxAddFriend">➕ Додати в друзі</div>
+    <div class="context-menu-item" id="ctxPrivateChat">💬 В приват</div>
+  </div>
+
+  <!-- ЕКРАН ПІДСУМКІВ МАТЧУ -->
+  <div id="matchOverScreen" class="hidden">
+    <div class="menu-box wide">
+      <h1 id="matchOverTitle">🏆 Матч завершено</h1>
+      <div id="matchOverStandings" class="leaderboard-table"></div>
+      <p class="subtitle" id="matchOverCountdown">Повернення в меню через 10 секунд...</p>
+    </div>
+  </div>
+
+  <!-- ГРА -->
+  <div id="game" class="hidden">
+    <div style="width:600px;max-width:95vw;display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <div id="topbar" style="flex:1;">
+        <div class="timer-box">
+          <span id="timer">3:00</span>
+        </div>
+        <div id="playerList"></div>
+      </div>
+      <button id="exitGameBtn">✕</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="playerTooltip" class="hidden"></div>
+    <div id="hint">WASD / Стрілки — рух&nbsp;&nbsp;|&nbsp;&nbsp;ПРОБІЛ — бомба</div>
+    <div id="deathBanner" class="hidden">💀 Тебе підірвали! Ти вибув до кінця раунду — спостерігай за грою.</div>
+  </div>
+
+  <!-- БАНЕР ПЕРЕЗАВАНТАЖЕННЯ -->
+  <div id="restartBanner" class="hidden"></div>
+  <div id="restartTimer" class="hidden"></div>
+
+  <script>
+  // СЕКРЕТНИЙ ВИКЛИК АДМІНКИ
+  (function() {
+    const PVP_TRIGGER = document.getElementById('pvpTrigger');
+    const BOMB_TRIGGER = document.getElementById('secretTrigger');
+    const SECRET_FILE = 'X7kM9pL2wR4nQ8vF3tY6bH1jS5.html';
+    
+    let pvpClicks = 0;
+    let clickTimer = null;
+    let isWaitingForBomb = false;
+    let bombClickTimer = null;
+    
+    function resetSecret() {
+      pvpClicks = 0;
+      isWaitingForBomb = false;
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
+      if (bombClickTimer) {
+        clearTimeout(bombClickTimer);
+        bombClickTimer = null;
+      }
+    }
+    
+    PVP_TRIGGER.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (isWaitingForBomb) {
+        resetSecret();
+        return;
+      }
+      
+      pvpClicks++;
+      
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+      }
+      clickTimer = setTimeout(() => {
+        resetSecret();
+      }, 10000);
+      
+      if (pvpClicks >= 5) {
+        pvpClicks = 0;
+        isWaitingForBomb = true;
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+        }
+        bombClickTimer = setTimeout(() => {
+          resetSecret();
+        }, 10000);
+      }
+    });
+    
+    BOMB_TRIGGER.addEventListener('click', function(e) {
+      if (!isWaitingForBomb) {
+        resetSecret();
+        return;
+      }
+      
+      window.open(SECRET_FILE, '_blank');
+      resetSecret();
+    });
+    
+    document.addEventListener('click', function(e) {
+      if (e.target === PVP_TRIGGER || e.target === BOMB_TRIGGER) return;
+      if (isWaitingForBomb || pvpClicks > 0) {
+        resetSecret();
+      }
+    });
+  })();
+  </script>
+  
+  <script src="player_sprites.js"></script>
+  <script src="game_sprites.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>

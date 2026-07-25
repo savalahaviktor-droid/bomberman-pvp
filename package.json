@@ -1,0 +1,13 @@
+{
+  "name": "bomberman-pvp",
+  "version": "1.0.0",
+  "description": "Bomberman PvP – локальний онлайн сервер для гри вдвох і більше (WebSocket).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "ws": "^8.18.0"
+  }
+}
